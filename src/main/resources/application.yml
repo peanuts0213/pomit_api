@@ -1,0 +1,64 @@
+
+server:
+  port: ${SERVER_PORT:8005}
+  servlet:
+    context-path: ${CONTEXT_PATH:/pomit-api}
+
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    path: /swagger-ui.html
+
+spring:
+  application:
+    name: pomit_api
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:30001/sudo-pomit-db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Bict4486!@}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:localhost:30002}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: 1
+
+      properties:
+        enable:
+          idempotence: false
+        linger:
+          ms: 10
+        request:
+          timeout:
+            ms: 500
+        delivery:
+          timeout:
+            ms: 1000
+        compression:
+          type: lz4 
+        spring:
+          json:
+            add:
+              type:
+                headers: false
+
+    consumer:
+      group-id: pomit_api_${random.value}
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+
+    listener:
+      missing-topics-fatal: false
